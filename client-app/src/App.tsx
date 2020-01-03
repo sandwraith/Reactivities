@@ -26,7 +26,6 @@ class App extends Component {
             <List.Item key={value.id}>{value.name}</List.Item>
           ))}
         </List>
-        <ul></ul>
       </div>
     );
   }
