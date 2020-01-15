@@ -30,29 +30,30 @@ namespace Application.Activities
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
                 var activity = await _context.Activities.FindAsync(request.Id);
+
                 if (activity == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Activity = "Could not found activity" });
+                    throw new RestException(HttpStatusCode.NotFound, new {Activity = "Cound not find activity"});
 
-                var user = await _context.Users
-                .SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
+                var user = await _context.Users.SingleOrDefaultAsync(x => 
+                    x.UserName == _userAccessor.GetCurrentUsername());
 
-                var attendence = await _context.UserActivities
-                    .SingleOrDefaultAsync(x => x.ActivityId == activity.Id &&
-                    x.AppUserId == user.Id);
+                var attendance = await _context.UserActivities
+                    .SingleOrDefaultAsync(x => x.ActivityId == activity.Id && 
+                        x.AppUserId == user.Id); 
 
-                if (attendence == null)
-                    return Unit.Value;
+                if (attendance == null)
+                    return Unit.Value;   
 
-                if (attendence.IsHost)
-                    throw new RestException(HttpStatusCode.BadRequest,
-                    new { Attendence = "You cannot remove yourself as host" });
+                if (attendance.IsHost)
+                    throw new RestException(HttpStatusCode.BadRequest, new {Attendance = "You cannot remove yourself as host"});
 
-                _context.UserActivities.Remove(attendence);
+                _context.UserActivities.Remove(attendance);
 
                 var success = await _context.SaveChangesAsync() > 0;
+
                 if (success) return Unit.Value;
 
-                throw new Exception("Problem Saving Changes");
+                throw new Exception("Problem saving changes");
             }
         }
     }

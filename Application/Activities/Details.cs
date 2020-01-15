@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Errors;
@@ -29,12 +30,14 @@ namespace Application.Activities
 
             public async Task<ActivityDto> Handle(Query request, CancellationToken cancellationToken)
             {
-                var activity = await _context.Activities.FindAsync(request.Id);
+                var activity = await _context.Activities
+                    .FindAsync(request.Id);
+
+                if (activity == null)
+                    throw new RestException(HttpStatusCode.NotFound, new { Activity = "Not found" });
 
                 var activityToReturn = _mapper.Map<Activity, ActivityDto>(activity);
 
-                if (activity == null)
-                    throw new RestException(System.Net.HttpStatusCode.NotFound, new { activity = "Not Found" });
                 return activityToReturn;
             }
         }

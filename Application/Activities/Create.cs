@@ -17,10 +17,10 @@ namespace Application.Activities
             public Guid Id { get; set; }
             public string Title { get; set; }
             public string Description { get; set; }
+            public string Category { get; set; }
             public DateTime Date { get; set; }
             public string City { get; set; }
             public string Venue { get; set; }
-            public string Category { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -29,10 +29,10 @@ namespace Application.Activities
             {
                 RuleFor(x => x.Title).NotEmpty();
                 RuleFor(x => x.Description).NotEmpty();
+                RuleFor(x => x.Category).NotEmpty();
                 RuleFor(x => x.Date).NotEmpty();
                 RuleFor(x => x.City).NotEmpty();
                 RuleFor(x => x.Venue).NotEmpty();
-                RuleFor(x => x.Category).NotEmpty();
             }
         }
 
@@ -60,7 +60,10 @@ namespace Application.Activities
                 };
 
                 _context.Activities.Add(activity);
-                var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
+
+                var user = await _context.Users.SingleOrDefaultAsync(x => 
+                    x.UserName == _userAccessor.GetCurrentUsername());
+
                 var attendee = new UserActivity
                 {
                     AppUser = user,
@@ -72,9 +75,10 @@ namespace Application.Activities
                 _context.UserActivities.Add(attendee);
 
                 var success = await _context.SaveChangesAsync() > 0;
+
                 if (success) return Unit.Value;
 
-                throw new Exception("Problem Saving Changes");
+                throw new Exception("Problem saving changes");
             }
         }
     }

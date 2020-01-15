@@ -31,15 +31,14 @@ namespace Application.User
 
         public class Handler : IRequestHandler<Query, User>
         {
-            private readonly SignInManager<AppUser> _signInManager;
             private readonly UserManager<AppUser> _userManager;
+            private readonly SignInManager<AppUser> _signInManager;
             private readonly IJwtGenerator _jwtGenerator;
-
             public Handler(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IJwtGenerator jwtGenerator)
             {
                 _jwtGenerator = jwtGenerator;
-                _userManager = userManager;
                 _signInManager = signInManager;
+                _userManager = userManager;
             }
 
             public async Task<User> Handle(Query request, CancellationToken cancellationToken)
@@ -47,26 +46,25 @@ namespace Application.User
                 var user = await _userManager.FindByEmailAsync(request.Email);
 
                 if (user == null)
-                {
                     throw new RestException(HttpStatusCode.Unauthorized);
-                }
 
-                var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+                var result = await _signInManager
+                    .CheckPasswordSignInAsync(user, request.Password, false);
 
                 if (result.Succeeded)
                 {
-                    //TODO: generate token
+                    // TODO: generate token
                     return new User
                     {
                         DisplayName = user.DisplayName,
                         Token = _jwtGenerator.CreateToken(user),
-                        UserName = user.UserName,
+                        Username = user.UserName,
                         Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
                     };
                 }
+
                 throw new RestException(HttpStatusCode.Unauthorized);
             }
-
         }
     }
 }

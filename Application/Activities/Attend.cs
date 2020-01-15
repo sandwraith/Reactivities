@@ -31,21 +31,22 @@ namespace Application.Activities
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
                 var activity = await _context.Activities.FindAsync(request.Id);
+
                 if (activity == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Activity = "Could not found activity" });
+                    throw new RestException(HttpStatusCode.NotFound, new {Activity = "Cound not find activity"});
 
-                var user = await _context.Users
-                .SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
+                var user = await _context.Users.SingleOrDefaultAsync(x => 
+                    x.UserName == _userAccessor.GetCurrentUsername());
 
-                var attendence = await _context.UserActivities
-                    .SingleOrDefaultAsync(x => x.ActivityId == activity.Id &&
-                    x.AppUserId == user.Id);
+                var attendance = await _context.UserActivities
+                    .SingleOrDefaultAsync(x => x.ActivityId == activity.Id && 
+                        x.AppUserId == user.Id);
 
-                if (attendence != null)
-                    throw new RestException(HttpStatusCode.BadRequest,
-                    new { Attendence = "Already attending the activity" });
+                if (attendance != null)
+                    throw new RestException(HttpStatusCode.BadRequest, 
+                        new {Attendance = "Already attending this activity"});
 
-                attendence = new UserActivity
+                attendance = new UserActivity
                 {
                     Activity = activity,
                     AppUser = user,
@@ -53,12 +54,13 @@ namespace Application.Activities
                     DateJoined = DateTime.Now
                 };
 
-                _context.UserActivities.Add(attendence);
+                _context.UserActivities.Add(attendance);
 
                 var success = await _context.SaveChangesAsync() > 0;
+
                 if (success) return Unit.Value;
 
-                throw new Exception("Problem Saving Changes");
+                throw new Exception("Problem saving changes");
             }
         }
     }
